@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSH AP Smart Validation Toolkit</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #a5b4fc, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 16px;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .btn {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result-panel {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--card-border);
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding-bottom: 6px;
+        }
+
+        .result-row:last-child {
+            border: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .result-label {
+            color: var(--text-secondary);
+        }
+
+        .result-value {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .badge-success { color: var(--success); }
+        .badge-error { color: var(--error); }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 11px;
+            color: rgba(148, 163, 184, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>AP Smart Validation</h1>
+        <p>BSH accounts payable offline verification toolkit</p>
+    </div>
+
+    <div class="form-group">
+        <label for="iban">IBAN / ACCOUNT NUMBER</label>
+        <input type="text" id="iban" placeholder="PL00000000000000000000000000" autocomplete="off" spellcheck="false">
+    </div>
+
+    <button class="btn" onclick="validateIBAN()">Verify Details</button>
+
+    <div class="result-panel" id="resultPanel">
+        <div class="result-title" id="resultTitle">Verification Status</div>
+        <div class="result-row">
+            <span class="result-label">Country Code:</span>
+            <span class="result-value" id="resCountry">—</span>
+        </div>
+        <div class="result-row">
+            <span class="result-label">Format:</span>
+            <span class="result-value" id="resFormat">—</span>
+        </div>
+        <div class="result-row">
+            <span class="result-label">Identified Bank:</span>
+            <span class="result-value" id="resBank">—</span>
+        </div>
+        <div class="result-row">
+            <span class="result-label">Checksum Validation:</span>
+            <span class="result-value" id="resChecksum">—</span>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        🔒 GDPR Compliant: runs entirely client-side. No data is sent or logged.
+    </div>
+</div>
+
+<script>
+    // Polish bank codes map (first 4 digits of bank code)
+    const polishBanks = {
+        "1010": "Narodowy Bank Polski",
+        "1020": "PKO BP",
+        "1030": "Bank Handlowy (Citi Handlowy)",
+        "1050": "ING Bank Śląski",
+        "1060": "BPH",
+        "1090": "Santander Bank Polska",
+        "1130": "BGK",
+        "1140": "mBank",
+        "1160": "Bank Millennium",
+        "1220": "Kredyt Bank",
+        "1240": "Pekao SA",
+        "1280": "HSBC Bank Polska",
+        "1320": "Societe Generale",
+        "1470": "Euro Bank",
+        "1540": "BOŚ Bank",
+        "1580": "Mercedes-Benz Bank Polska",
+        "1600": "BNP Paribas",
+        "1610": "SGB-Bank",
+        "1680": "Plus Bank",
+        "1750": "BNP Paribas (ex Raiffeisen)",
+        "1840": "Societe Generale (Poland)",
+        "1870": "Nest Bank",
+        "1880": "Deutsche Bank Polska",
+        "1910": "Deutsche Bank (ex-PB)",
+        "1930": "Bank Polskiej Spółdzielczości",
+        "1940": "Credit Agricole",
+        "1950": "Idea Bank",
+        "2030": "BNP Paribas (ex BGŻ)",
+        "2120": "Santander Consumer Bank",
+        "2130": "DNB Bank Polska",
+        "2160": "Toyota Bank Polska",
+        "2190": "Alior Bank",
+        "2490": "Alior Bank (T-Mobile)"
+    };
+
+    // Turkish bank codes map (5 digits starting from 5th character of IBAN)
+    const turkishBanks = {
+        "00010": "T.C. Ziraat Bankası",
+        "00012": "Türkiye Halk Bankası (Halkbank)",
+        "00015": "Türkiye Vakıflar Bankası (VakıfBank)",
+        "00017": "İller Bankası",
+        "00029": "Birleşik Fon Bankası",
+        "00032": "Türk Ekonomi Bankası (TEB)",
+        "00046": "Akbank",
+        "00059": "Şekerbank",
+        "00062": "Garanti BBVA",
+        "00064": "Türkiye İş Bankası",
+        "00067": "Yapı ve Kredi Bankası",
+        "00091": "Arap Türk Bankası (A&T Bank)",
+        "00092": "Citibank",
+        "00096": "Turkish Bank",
+        "00099": "ING Bank",
+        "00100": "Adabank",
+        "00103": "Fibabanka",
+        "00104": "Diler Yatırım Bankası",
+        "00108": "GSD Bank",
+        "00109": "ICBC Turkey Bank",
+        "00111": "QNB Finansbank",
+        "00123": "HSBC Bank",
+        "00124": "Alternatif Bank",
+        "00125": "Burgan Bank",
+        "00134": "DenizBank",
+        "00135": "Anadolubank",
+        "00137": "Rabobank A.Ş.",
+        "00138": "MUFG Bank Turkey",
+        "00139": "Intesa Sanpaolo",
+        "00140": "Merrill Lynch",
+        "00141": "Standard Chartered",
+        "00142": "Bank of China Turkey",
+        "00143": "Aktif Yatırım Bankası (Aktif Bank)",
+        "00146": "Odeabank",
+        "00147": "Bankpozitif",
+        "00148": "Turkland Bank (T-Bank)",
+        "00151": "Golden Global Yatırım Bankası",
+        "00152": "Pasifik Yatırım Bankası",
+        "00153": "Q Yatırım Bankası",
+        "00154": "Destek Yatırım Bankası",
+        "00155": "Trio Yatırım Bankası",
+        "00201": "Türkiye Kalkınma ve Yatırım Bankası",
+        "00202": "Türkiye Sınai Kalkınma Bankası (TSKB)",
+        "00203": "Albaraka Türk Katılım Bankası",
+        "00205": "Kuveyt Türk Katılım Bankası",
+        "00206": "Türkiye Finans Katılım Bankası",
+        "00209": "Emlak Katılım Bankası",
+        "00210": "Vakıf Katılım Bankası",
+        "00211": "Ziraat Katılım Bankası"
+    };
+
+    function validateIBAN() {
+        const rawInput = document.getElementById('iban').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const panel = document.getElementById('resultPanel');
+        
+        if (!rawInput) {
+            alert("Please enter an account number.");
+            return;
+        }
+
+        let iban = rawInput;
+        // Smart Country Prepending
+        if (/^\d+$/.test(iban)) {
+            if (iban.length === 24) {
+                // Turkey format: 24 digits -> TR + 24 digits = 26 chars
+                iban = "TR" + iban;
+            } else if (iban.length === 26) {
+                // Poland format: 26 digits -> PL + 26 digits = 28 chars
+                iban = "PL" + iban;
+            }
+        }
+
+        panel.style.display = "block";
+        
+        const country = iban.substring(0, 2);
+        document.getElementById('resCountry').innerText = country;
+        
+        const isPl = (country === "PL");
+        const isTr = (country === "TR");
+        
+        // Expected lengths
+        let targetLengthText = "15-34";
+        let isLengthValid = false;
+        if (isPl) {
+            targetLengthText = "28 chars";
+            isLengthValid = (iban.length === 28);
+        } else if (isTr) {
+            targetLengthText = "26 chars";
+            isLengthValid = (iban.length === 26);
+        } else {
+            isLengthValid = (iban.length >= 15 && iban.length <= 34);
+        }
+        
+        document.getElementById('resFormat').innerText = `${iban.length} chars (Target: ${targetLengthText})`;
+        
+        // Identify Bank
+        let bankName = "Unknown Bank / Foreign Account";
+        if (isPl && iban.length >= 8) {
+            const bankCode = iban.substring(4, 8);
+            if (polishBanks[bankCode]) {
+                bankName = polishBanks[bankCode] + ` (${bankCode})`;
+            } else {
+                bankName = `Unknown Polish Bank (Code: ${bankCode})`;
+            }
+        } else if (isTr && iban.length >= 9) {
+            const bankCode = iban.substring(4, 9);
+            if (turkishBanks[bankCode]) {
+                bankName = turkishBanks[bankCode] + ` (${bankCode})`;
+            } else {
+                bankName = `Unknown Turkish Bank (Code: ${bankCode})`;
+            }
+        }
+        document.getElementById('resBank').innerText = bankName;
+
+        // Modulo 97 validation
+        const isValid = checkModulo97(iban);
+        const title = document.getElementById('resultTitle');
+        const checksumNode = document.getElementById('resChecksum');
+
+        if (isValid && isLengthValid) {
+            title.innerHTML = `🟢 Verification Successful`;
+            title.className = "result-title badge-success";
+            checksumNode.innerHTML = `<span class="badge-success">VALID (Checksum Match)</span>`;
+        } else {
+            title.innerHTML = `🔴 Verification Failed`;
+            title.className = "result-title badge-error";
+            checksumNode.innerHTML = `<span class="badge-error">INVALID (Checksum Error or Length Mismatch)</span>`;
+        }
+    }
+
+    function checkModulo97(iban) {
+        if (iban.length < 5) return false;
+        
+        // Rearrange Country Code and Check digits to the end
+        const rearranged = iban.substring(4) + iban.substring(0, 4);
+        
+        // Convert alphabet to digits
+        let numericString = "";
+        for (let i = 0; i < rearranged.length; i++) {
+            const code = rearranged.charCodeAt(i);
+            if (code >= 65 && code <= 90) { // A-Z
+                numericString += (code - 55).toString();
+            } else {
+                numericString += rearranged[i];
+            }
+        }
+
+        // Large number modulo 97 arithmetic
+        let remainder = 0;
+        for (let i = 0; i < numericString.length; i++) {
+            remainder = (remainder * 10 + parseInt(numericString[i], 10)) % 97;
+        }
+
+        return remainder === 1;
+    }
+</script>
+</body>
+</html>
