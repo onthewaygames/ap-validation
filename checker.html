@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Column Cross-Checker | AP Toolkit</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #090d16 0%, #111827 50%, #1e1b4b 100%);
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --accent-hover: #4f46e5;
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.2);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.15);
+            --panel-bg: rgba(10, 15, 30, 0.6);
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 35px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            background: linear-gradient(to right, #a5b4fc, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Input Grid Section */
+        .input-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .input-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .input-group label span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            background: rgba(99, 102, 241, 0.1);
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            background: var(--panel-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-primary);
+            outline: none;
+            resize: none;
+            transition: all 0.25s ease;
+            line-height: 1.5;
+        }
+
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+            background: rgba(10, 15, 30, 0.8);
+        }
+
+        /* Paste Excel helper */
+        .paste-excel-container {
+            grid-column: 1 / -1;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px dashed rgba(99, 102, 241, 0.25);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+
+        .paste-excel-container:hover {
+            background: rgba(99, 102, 241, 0.08);
+            border-color: var(--accent);
+        }
+
+        .paste-excel-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .paste-excel-text strong {
+            color: #818cf8;
+        }
+
+        /* Action Buttons */
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 160px;
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: var(--success);
+            box-shadow: 0 4px 12px var(--success-glow);
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Stats panel */
+        .stats-panel {
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+            animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @media (max-width: 640px) {
+            .stats-panel {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Results table */
+        .results-wrapper {
+            display: none;
+            background: var(--panel-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--card-border);
+            background: rgba(10, 15, 30, 0.4);
+        }
+
+        .results-header h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.95);
+            z-index: 10;
+        }
+
+        th {
+            padding: 12px 20px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--card-border);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 10px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-var {
+            background: var(--success-glow);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-yok {
+            background: var(--danger-glow);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(16, 185, 129, 0.95);
+            color: #ffffff;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(16, 185, 129, 0.4);
+            z-index: 100;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 11px;
+            color: rgba(156, 163, 175, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Smart Column Cross-Checker</h1>
+        <p>Excel sütunlarını anlık eşleştirin, eşleşenleri tek tuşla geri kopyalayın</p>
+    </header>
+
+    <!-- Global Excel Paste Area -->
+    <div class="paste-excel-container" id="globalPasteArea" title="Excel'den kopyaladığınız iki sütunu doğrudan buraya yapıştırabilirsiniz">
+        <div class="paste-excel-text">
+            📋 <strong>Excel'den 2 sütun mu kopyaladınız?</strong> Buraya tıklayıp <strong>Ctrl+V</strong> yapın, sütunları otomatik ayıralım.
+        </div>
+    </div>
+
+    <!-- Multi-Column Textareas -->
+    <div class="input-section">
+        <div class="input-group">
+            <label for="colA">A SÜTUNU (Kontrol Edilecek Değerler) <span id="countA">0 Satır</span></label>
+            <textarea id="colA" placeholder="Numaraları buraya yapıştırın (her satıra bir tane)..." autocomplete="off" spellcheck="false"></textarea>
+        </div>
+        <div class="input-group">
+            <label for="colB">B SÜTUNU (Aranacak Havuz) <span id="countB">0 Satır</span></label>
+            <textarea id="colB" placeholder="Karşılaştırılacak havuzu buraya yapıştırın (her satıra bir tane)..." autocomplete="off" spellcheck="false"></textarea>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+        <button class="btn" id="btnCheck">🔎 Eşleşmeleri Kontrol Et</button>
+        <button class="btn btn-secondary" id="btnReset">🔄 Sıfırla</button>
+        <button class="btn btn-success" id="btnCopyC" style="display: none;">📋 C Sütununu Kopyala (Excel İçin)</button>
+        <button class="btn btn-secondary" id="btnExport" style="display: none;">📤 Tüm Tabloyu Kopyala</button>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-panel" id="statsPanel">
+        <div class="stat-card">
+            <div class="stat-val" id="statTotal" style="color: var(--text-primary);">0</div>
+            <div class="stat-label">Toplam Satır</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="statVar" style="color: var(--success);">0</div>
+            <div class="stat-label">Bulunan (Var)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="statYok" style="color: var(--danger);">0</div>
+            <div class="stat-label">Bulunamayan (Yok)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="statRatio" style="color: var(--accent);">0%</div>
+            <div class="stat-label">Eşleşme Oranı</div>
+        </div>
+    </div>
+
+    <!-- Results Display -->
+    <div class="results-wrapper" id="resultsWrapper">
+        <div class="results-header">
+            <h3>📊 Karşılaştırma Sonuçları</h3>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">A Sütunu</th>
+                        <th style="width: 30%;">B Sütunu Durumu</th>
+                        <th style="width: 30%;">C Sütunu (Sonuç)</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                    <!-- Dynamic Rows -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <span>OnTheWay Games © 2026 AP Validation Toolkit</span>
+    <span>Güvenli ve %100 yerel: Verileriniz sunucularımıza gitmez, doğrudan tarayıcınızda işlenir.</span>
+</div>
+
+<!-- Toast notification element -->
+<div class="toast" id="toast">
+    <span id="toastIcon">✓</span>
+    <span id="toastMessage">Kopyalandı!</span>
+</div>
+
+<script>
+    // DOM Elements
+    const colA = document.getElementById('colA');
+    const colB = document.getElementById('colB');
+    const countA = document.getElementById('countA');
+    const countB = document.getElementById('countB');
+    const btnCheck = document.getElementById('btnCheck');
+    const btnReset = document.getElementById('btnReset');
+    const btnCopyC = document.getElementById('btnCopyC');
+    const btnExport = document.getElementById('btnExport');
+    const statsPanel = document.getElementById('statsPanel');
+    const resultsWrapper = document.getElementById('resultsWrapper');
+    const resultsBody = document.getElementById('resultsBody');
+    const globalPasteArea = document.getElementById('globalPasteArea');
+    const toast = document.getElementById('toast');
+
+    // State Variables
+    let resultsList = [];
+
+    // Row count counters helper
+    function updateCounts() {
+        const linesA = colA.value.split('\n').filter(line => line.trim() !== '');
+        const linesB = colB.value.split('\n').filter(line => line.trim() !== '');
+        countA.textContent = `${linesA.length} Satır`;
+        countB.textContent = `${linesB.length} Satır`;
+    }
+
+    colA.addEventListener('input', updateCounts);
+    colB.addEventListener('input', updateCounts);
+
+    // Global Paste Listener (to easily separate two copied columns from Excel)
+    globalPasteArea.addEventListener('click', () => {
+        navigator.clipboard.readText().then(text => {
+            handlePasteData(text);
+        }).catch(err => {
+            showToast('Lütfen doğrudan Ctrl+V tuş kombinasyonuyla buraya yapıştırın.', false);
+        });
+    });
+
+    document.addEventListener('paste', (e) => {
+        // If focus is not inside textareas, auto process global paste
+        if (document.activeElement !== colA && document.activeElement !== colB) {
+            const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+            handlePasteData(pasteData);
+        }
+    });
+
+    function handlePasteData(text) {
+        if (!text) return;
+        const rows = text.split(/\r?\n/).map(row => row.split('\t'));
+        
+        // If it looks like multiple columns
+        if (rows.length > 0 && rows[0].length >= 2) {
+            const listA = [];
+            const listB = [];
+            
+            rows.forEach(row => {
+                if (row[0] !== undefined && row[0].trim() !== '') {
+                    listA.push(row[0].trim());
+                }
+                if (row[1] !== undefined && row[1].trim() !== '') {
+                    listB.push(row[1].trim());
+                }
+            });
+            
+            colA.value = listA.join('\n');
+            colB.value = listB.join('\n');
+            updateCounts();
+            showToast('İki sütun başarıyla Excel tablosundan ayrıştırıldı!');
+        } else {
+            // Default split to A
+            const singleCol = text.split(/\r?\n/).map(val => val.trim()).filter(val => val !== '');
+            if (singleCol.length > 0) {
+                colA.value = singleCol.join('\n');
+                updateCounts();
+                showToast('Veriler A sütununa yapıştırıldı.');
+            }
+        }
+    }
+
+    // Checking Core Logic
+    btnCheck.addEventListener('click', () => {
+        const rawA = colA.value.split('\n').map(val => val.trim());
+        const rawB = colB.value.split('\n').map(val => val.trim());
+
+        // Filter out empty rows but maintain original indexing for non-empty items
+        const listA = rawA.filter(val => val !== '');
+        
+        // Use a Set for O(1) lookups of Column B values
+        const setB = new Set(rawB.filter(val => val !== ''));
+
+        if (listA.length === 0) {
+            showToast('A sütunu boş! Lütfen kontrol edilecek değerleri girin.', false);
+            return;
+        }
+
+        resultsList = [];
+        let matchCount = 0;
+        
+        // Check matching
+        listA.forEach(val => {
+            const exists = setB.has(val);
+            if (exists) matchCount++;
+            resultsList.push({
+                value: val,
+                status: exists ? 'VAR' : 'YOK'
+            });
+        });
+
+        // Update UI table
+        resultsBody.innerHTML = '';
+        resultsList.forEach(item => {
+            const tr = document.createElement('tr');
+            
+            const tdA = document.createElement('td');
+            tdA.textContent = item.value;
+            
+            const tdB = document.createElement('td');
+            tdB.innerHTML = item.status === 'VAR' 
+                ? '<span class="badge badge-var">Eşleşiyor</span>' 
+                : '<span class="badge badge-yok">Eşleşmiyor</span>';
+                
+            const tdC = document.createElement('td');
+            tdC.innerHTML = `<span class="badge ${item.status === 'VAR' ? 'badge-var' : 'badge-yok'}">${item.status}</span>`;
+            
+            tr.appendChild(tdA);
+            tr.appendChild(tdB);
+            tr.appendChild(tdC);
+            resultsBody.appendChild(tr);
+        });
+
+        // Update statistics
+        const total = resultsList.length;
+        const yokCount = total - matchCount;
+        const ratio = total > 0 ? Math.round((matchCount / total) * 100) : 0;
+
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statVar').textContent = matchCount;
+        document.getElementById('statYok').textContent = yokCount;
+        document.getElementById('statRatio').textContent = `${ratio}%`;
+
+        // Render sections
+        statsPanel.style.display = 'grid';
+        resultsWrapper.style.display = 'block';
+        btnCopyC.style.display = 'inline-flex';
+        btnExport.style.display = 'inline-flex';
+        
+        showToast('Karşılaştırma tamamlandı!');
+    });
+
+    // Copy Column C to Clipboard (Tab separated format for direct Excel paste)
+    btnCopyC.addEventListener('click', () => {
+        if (resultsList.length === 0) return;
+        const columnCContent = resultsList.map(item => item.status).join('\r\n');
+        
+        navigator.clipboard.writeText(columnCContent).then(() => {
+            showToast('C Sütunu kopyalandı! Excel\'de doğrudan ilk satırın yanına yapıştırabilirsiniz.');
+        }).catch(err => {
+            showToast('Kopyalama başarısız oldu.', false);
+        });
+    });
+
+    // Export entire checked table (Tab separated format for direct Excel paste)
+    btnExport.addEventListener('click', () => {
+        if (resultsList.length === 0) return;
+        
+        // Create headers
+        let exportText = 'A Sütunu\tB Sütunu Durumu\tC Sütunu (Sonuç)\r\n';
+        
+        // Create rows
+        resultsList.forEach(item => {
+            exportText += `${item.value}\t${item.status === 'VAR' ? 'Eşleşiyor' : 'Eşleşmiyor'}\t${item.status}\r\n`;
+        });
+
+        navigator.clipboard.writeText(exportText).then(() => {
+            showToast('Tüm tablo kopyalandı! Excel\'e doğrudan yapıştırabilirsiniz.');
+        }).catch(err => {
+            showToast('Kopyalama başarısız oldu.', false);
+        });
+    });
+
+    // Reset Form
+    btnReset.addEventListener('click', () => {
+        colA.value = '';
+        colB.value = '';
+        updateCounts();
+        
+        statsPanel.style.display = 'none';
+        resultsWrapper.style.display = 'none';
+        btnCopyC.style.display = 'none';
+        btnExport.style.display = 'none';
+        
+        showToast('Tüm alanlar temizlendi.');
+    });
+
+    // Toast Notifications
+    function showToast(message, isSuccess = true) {
+        const toastMessageElement = document.getElementById('toastMessage');
+        const toastIconElement = document.getElementById('toastIcon');
+        
+        toastMessageElement.textContent = message;
+        toastIconElement.textContent = isSuccess ? '✓' : '⚠';
+        
+        if (isSuccess) {
+            toast.style.background = 'rgba(16, 185, 129, 0.95)';
+            toast.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(16, 185, 129, 0.4)';
+        } else {
+            toast.style.background = 'rgba(239, 68, 68, 0.95)';
+            toast.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(239, 68, 68, 0.4)';
+        }
+
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3500);
+    }
+</script>
+</body>
+</html>
